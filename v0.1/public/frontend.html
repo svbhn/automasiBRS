@@ -147,35 +147,50 @@
       </div>
 
       <div class="upload-grid">
-        <div class="upload-card filled">
+        <div class="upload-card filled" id="upload-card">
           <span class="tag tpl">File Excel</span>
           <h3>Pivot Table IHK &amp; inflasi</h3>
-          <div class="dropzone">
+          <input type="file" id="file-input" accept=".xlsx" style="display:none">
+          <div class="dropzone" id="dropzone">
             <div class="file-ico">XLS</div>
             <div class="file-meta">
-              <div class="fname">1_9400_Template_Olah_Juni_2026.xlsx</div>
-              <div class="fsub">10 sheet · 517.5 KB</div>
+              <div class="fname" id="fname">Belum ada file dipilih</div>
+              <div class="fsub" id="fsub">Klik untuk memilih file .xlsx (pivot atau dataset mentah)</div>
             </div>
-            <button class="browse-btn">Ganti</button>
+            <button class="browse-btn" id="browse-btn" type="button">Pilih file</button>
+          </div>
+          <div id="periode-fields" style="display:none; margin-top:14px; gap:10px; grid-template-columns:1fr 1fr;">
+            <div>
+              <label style="font-size:12px;">Bulan</label>
+              <select id="input-bulan" style="width:100%;padding:8px;border-radius:8px;"></select>
+            </div>
+            <div>
+              <label style="font-size:12px;">Tahun</label>
+              <input id="input-tahun" type="number" placeholder="2026" style="width:100%;padding:8px;border-radius:8px;">
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <label style="font-size:12px;">Wilayah (DOB)</label>
+              <select id="input-wilayah" style="width:100%;padding:8px;border-radius:8px;"></select>
+            </div>
           </div>
         </div>
         
         <div class="upload-card">
           <span class="tag raw">Deteksi otomatis</span>
           <h3>Ringkasan yang terbaca</h3>
-          <p class="desc">Sistem membaca sheet <b>Pivot</b> dan mencocokkannya dengan struktur Tabel 1 pada templat BRS.</p>
+          <p class="desc" id="upload-desc">Sistem membaca sheet <b>Pivot</b> dan mencocokkannya dengan struktur Tabel 1 pada templat BRS.</p>
           <table class="brs-table" style="border-radius:9px; overflow:hidden;">
             <tr><th>Indikator</th><th style="text-align:right;">Nilai</th></tr>
-            <tr><td>IHK Umum, Juni 2026</td><td class="num">110,19</td></tr>
-            <tr><td>Inflasi y-on-y</td><td class="num">3,72%</td></tr>
-            <tr><td>Inflasi m-to-m</td><td class="num">1,00%</td></tr>
-            <tr><td>Inflasi y-to-d</td><td class="num">1,71%</td></tr>
+            <tr><td>IHK Umum</td><td class="num" id="sum-ihk">-</td></tr>
+            <tr><td>Inflasi y-on-y</td><td class="num" id="sum-yoy">-</td></tr>
+            <tr><td>Inflasi m-to-m</td><td class="num" id="sum-mom">-</td></tr>
+            <tr><td>Inflasi y-to-d</td><td class="num" id="sum-ytd">-</td></tr>
           </table>
         </div> 
       </div>
 
       <div class="actions">
-        <button class="btn-primary" onclick="goTo(2)">Lanjut ke pemetaan</button>
+        <button class="btn-primary" id="btn-to-step2" disabled onclick="proceedToMapping()">Lanjut ke pemetaan</button>
       </div>
     </section>
 
@@ -191,55 +206,18 @@
 
       <div class="map-section">
         <h3>Kelompok pengeluaran</h3>
-        <p class="sub">Diambil dari sheet <span class="mono">Pivot</span>, kolom Tingkat Inflasi y-on-y.</p>
+        <p class="sub">Diambil dari sheet <span class="mono">Pivot</span>/<span class="mono">DATASET</span>, kolom Tingkat Inflasi y-on-y.</p>
 
-        <div class="map-row">
-          <div class="pivot-cell">
-            <div class="lbl">Sheet "Pivot" · Baris "Makanan, Minuman, dan Tembakau"</div>
-            <div class="val">y-on-y = <span class="num">6,34</span> · andil = <span class="num">2,12</span></div>
-          </div>
-          <div class="arrow">
-            <svg width="24" height="18" viewBox="0 0 24 18" fill="none"><path d="M0 9H22M22 9L15 2M22 9L15 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="narasi-cell">
-            "…naiknya indeks kelompok pengeluaran pada kelompok makanan, minuman, dan tembakau sebesar <b>6,34 persen</b>…"
-          </div>
-        </div>
-
-        <div class="map-row">
-          <div class="pivot-cell">
-            <div class="lbl">Sheet "Pivot" · Baris "Perawatan Pribadi dan Jasa Lainnya"</div>
-            <div class="val">y-on-y = <span class="num">10,06</span> · andil = <span class="num">0,78</span></div>
-          </div>
-          <div class="arrow">
-            <svg width="24" height="18" viewBox="0 0 24 18" fill="none"><path d="M0 9H22M22 9L15 2M22 9L15 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="narasi-cell">
-            "…kelompok perawatan pribadi dan jasa lainnya sebesar <b>10,06 persen</b>, dengan andil <b>0,78 persen</b> terhadap inflasi umum."
-          </div>
-        </div>
-
-        <div class="map-row">
-          <div class="pivot-cell">
-            <div class="lbl">Sheet "Kelompok" · Komoditas dominan andil</div>
-            <div class="val">emas perhiasan, tomat, cabai rawit…</div>
-          </div>
-          <div class="arrow">
-            <svg width="24" height="18" viewBox="0 0 24 18" fill="none"><path d="M0 9H22M22 9L15 2M22 9L15 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="narasi-cell">
-            "Komoditas yang dominan memberikan andil/sumbangan inflasi <i>y-on-y</i>, antara lain <b>emas perhiasan, tomat, cabai rawit</b>…"
-          </div>
+        <div id="map-rows">
+          <div class="map-row"><div class="narasi-cell">Memuat pemetaan…</div></div>
         </div>
       </div>
 
-      <div class="note-box">
-        <b>3 cell memerlukan pemeriksaan manual</b> nilai berubah tanda (inflasi→deflasi) sejak periode sebelumnya, pada kelompok Pakaian dan Alas Kaki serta Perlengkapan Rumah Tangga. Tinjau kalimat yang dihasilkan sebelum lanjut.
-      </div>
+      <div class="note-box" id="mapping-note" style="display:none;"></div>
 
       <div class="actions">
         <button class="btn-ghost" onclick="goTo(1)">Kembali</button>
-        <button class="btn-primary" onclick="goTo(3)">Semua sudah sesuai, render naskah</button>
+        <button class="btn-primary" onclick="startRender()">Semua sudah sesuai, render naskah</button>
       </div>
     </section>
 
@@ -254,21 +232,15 @@
       </div>
 
       <div class="render-card">
-        <ul class="render-list">
-          <li><div class="r-dot">✓</div><div class="r-label">Validasi 11 kelompok pengeluaran terhadap sheet Kelompok &amp; Subkelompok</div><div class="r-time">14:64</div></li>
-          <li><div class="r-dot">✓</div><div class="r-label">Menyusun narasi ringkasan dan Tabel 1 (IHK &amp; tingkat inflasi)</div><div class="r-time">14:69</div></li>
-          <li><div class="r-dot">✓</div><div class="r-label">Menyusun narasi per kelompok (1.1 – 1.11)</div><div class="r-time">14:71</div></li>
-          <li><div class="r-dot spin">↻</div><div class="r-label">Menata Gambar 1 &amp; infografis ke artboard InDesign</div><div class="r-time">berjalan…</div></li>
-          <li><div class="r-dot pending">5</div><div class="r-label">Memeriksa tata letak 12 halaman &amp; menyiapkan ekspor PDF</div><div class="r-time">menunggu</div></li>
-        </ul>
+        <ul class="render-list" id="render-list"></ul>
 
-        <div class="progress-bar"><div class="progress-fill"></div></div>
-        <div class="progress-label"><span>Menata artboard halaman 7 dari 12</span><span>64%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label"><span id="progress-text">Memulai…</span><span id="progress-percent">0%</span></div>
       </div>
 
       <div class="actions">
         <button class="btn-ghost" onclick="goTo(2)">Kembali</button>
-        <button class="btn-primary" onclick="goTo(4)">Lihat hasil</button>
+        <button class="btn-primary" id="btn-see-result" onclick="goToResult()" disabled>Lihat hasil</button>
       </div>
     </section>
 
@@ -282,42 +254,16 @@
         <span class="status-pill">Selesai</span>
       </div>
 
-      <div class="output-grid">
+      <div class="output-grid" id="output-grid">
         <div class="output-card">
           <div class="output-top">
-            <div class="out-ico indd">INDD</div>
-            <div>
-              <div class="fname">BRS_IHK_Papua_Juni2026.indd</div>
-              <div class="fsub">Adobe InDesign 2025 · 12 halaman</div>
-            </div>
-          </div>
-          <div class="out-thumb">
-            <div class="m1">Berita Resmi Statistik</div>
-            <div class="m2">Perkembangan Indeks Harga Konsumen Provinsi Papua Juni 2026</div>
-            <div class="m3">No. 151/07/94/Th. XXIX</div>
-          </div>
-          <div class="output-actions">
-            <button class="btn-download">Unduh .indd</button>
+            <div class="out-ico indd">...</div>
+            <div><div class="fname">Memuat berkas…</div></div>
           </div>
         </div>
-
-        <div class="output-card">
-          <div class="output-top">
-            <div class="out-ico pdf">PDF</div>
-            <div>
-              <div class="fname">BRS_IHK_Papua_Juni2026.pdf</div>
-              <div class="fsub">Cetak · CMYK · 7.4 MB</div>
-            </div>
-          </div>
-          <div class="out-thumb">
-            <div class="m1">Pratinjau cetak</div>
-            <div class="m2">Inflasi y-on-y 3,72% <br> IHK 110,19</div>
-            <div class="m3">Siap diperiksa Editor</div>
-          </div>
-          <div class="output-actions">
-            <button class="btn-download">Unduh .pdf</button>
-          </div>
-        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <a href="#" id="zip-download-link" class="btn-download" style="display:inline-block; text-decoration:none;">Unduh semua (.zip)</a>
       </div>
 
       <div class="actions">
@@ -346,6 +292,7 @@
     window.scrollTo({top:0, behavior:'smooth'});
   }
 </script>
+<script src="app.js"></script>
 
 </body>
 </html>

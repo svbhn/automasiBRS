@@ -1,0 +1,7 @@
+node_modules/
+storage/uploads/*
+storage/sessions/*
+storage/outputs/*
+!storage/uploads/.gitkeep
+!storage/sessions/.gitkeep
+!storage/outputs/.gitkeep

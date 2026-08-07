@@ -110,11 +110,12 @@ function buildInfografisSVG(data, ctx, seriesHistory) {
   ]
     .map((b, i) => {
       const x = 40 + i * 320;
+      const type = b.value >= 0 ? 'INFLASI' : 'DEFLASI';
       return `<g>
         <rect x="${x}" y="140" width="290" height="90" rx="10" fill="${b.color}"/>
         <text x="${x + 20}" y="170" font-size="14" fill="white" font-family="Arial">${esc(b.label)}</text>
-        <text x="${x + 20}" y="210" font-size="30" fill="white" font-family="Arial" font-weight="bold">INFLASI ${idNumber(
-        b.value
+        <text x="${x + 20}" y="210" font-size="30" fill="white" font-family="Arial" font-weight="bold">${type} ${idNumber(
+        Math.abs(b.value)
       )}%</text>
       </g>`;
     })
@@ -189,6 +190,8 @@ function buildInfografisSVG(data, ctx, seriesHistory) {
     ${dots}`;
   }
 
+  const yoyText = umum.infYoy >= 0 ? 'inflasi' : 'deflasi';
+
   return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" font-family="Arial">
   <rect width="100%" height="100%" fill="${COLORS.white}"/>
   <text x="40" y="60" font-size="15" fill="${COLORS.purple}" font-family="Arial">PERKEMBANGAN</text>
@@ -204,8 +207,8 @@ function buildInfografisSVG(data, ctx, seriesHistory) {
   <rect x="0" y="${height - 90}" width="${width}" height="90" fill="${COLORS.purple}"/>
   <text x="40" y="${height - 50}" font-size="13" fill="white" font-family="Arial">Pada ${esc(ctx.bulanNow)} ${esc(
     ctx.tahunNow
-  )} terjadi inflasi year-on-year (y-on-y) ${esc(ctx.namaWilayah)} sebesar ${idNumber(
-    umum.infYoy
+  )} terjadi ${yoyText} year-on-year (y-on-y) ${esc(ctx.namaWilayah)} sebesar ${idNumber(
+    Math.abs(umum.infYoy)
   )} persen dengan Indeks Harga Konsumen (IHK) sebesar ${idNumber(umum.ihk)}.</text>
   <text x="40" y="${height - 25}" font-size="12" fill="white" font-family="Arial">BADAN PUSAT STATISTIK -- ${esc(
     ctx.namaWilayah.toUpperCase()

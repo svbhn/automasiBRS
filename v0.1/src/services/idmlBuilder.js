@@ -41,8 +41,9 @@ function xmlEscape(s) {
 function designmapXml(storyRefs) {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <?aid style="50" type="document" readerVersion="6.0" featureSet="257" product="19.0(50)" ?>
-<Document DOMVersion="19.0" Self="d">
+<Document DOMVersion="19.0" Self="d" StoryList="${storyRefs.map(id => `Story_${id}`).join(' ')}" ActiveLayer="Layer/Layer 1">
   <Language Self="Language/$ID/Indonesian" Name="$ID/Indonesian" SingleQuotes="'’’" DoubleQuotes="“”" />
+  <Layer Self="Layer/Layer 1" Name="Layer 1" Visible="true" Locked="false" Printable="true" />
   ${storyRefs.map((id) => `<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" src="Stories/Story_${id}.xml" />`).join('\n  ')}
   <idPkg:Spread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" src="Spreads/Spread_main.xml" />
 </Document>`;
@@ -77,15 +78,15 @@ function storyXml(id, paragraphs, styleName = 'BodyText') {
 function spreadXml(textFrames) {
   const frames = textFrames
     .map(
-      (f, i) => `<TextFrame Self="tf${i}" ParentStory="Story_${f.storyId}" GeometricBounds="${f.y1} ${f.x1} ${f.y2} ${f.x2}">
+      (f, i) => `<TextFrame Self="tf${i}" ParentStory="Story_${f.storyId}" ContentType="TextType" ItemLayer="Layer/Layer 1" ItemTransform="1 0 0 1 0 0" GeometricBounds="${f.y1} ${f.x1} ${f.y2} ${f.x2}">
       <Properties>
         <PathGeometry>
           <GeometryPathType PathOpen="false">
             <PathPointArray>
-              <PathPointType Anchor="${f.x1} ${f.y1}" LeftDirection="${f.x1} ${f.y1}" RightDirection="${f.x1} ${f.y1}" />
-              <PathPointType Anchor="${f.x2} ${f.y1}" LeftDirection="${f.x2} ${f.y1}" RightDirection="${f.x2} ${f.y1}" />
-              <PathPointType Anchor="${f.x2} ${f.y2}" LeftDirection="${f.x2} ${f.y2}" RightDirection="${f.x2} ${f.y2}" />
-              <PathPointType Anchor="${f.x1} ${f.y2}" LeftDirection="${f.x1} ${f.y2}" RightDirection="${f.x1} ${f.y2}" />
+              <PathPointType Anchor="${f.y1} ${f.x1}" LeftDirection="${f.y1} ${f.x1}" RightDirection="${f.y1} ${f.x1}" />
+              <PathPointType Anchor="${f.y1} ${f.x2}" LeftDirection="${f.y1} ${f.x2}" RightDirection="${f.y1} ${f.x2}" />
+              <PathPointType Anchor="${f.y2} ${f.x2}" LeftDirection="${f.y2} ${f.x2}" RightDirection="${f.y2} ${f.x2}" />
+              <PathPointType Anchor="${f.y2} ${f.x1}" LeftDirection="${f.y2} ${f.x1}" RightDirection="${f.y2} ${f.x1}" />
             </PathPointArray>
           </GeometryPathType>
         </PathGeometry>
@@ -133,7 +134,11 @@ const PREFERENCES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 </idPkg:Preferences>`;
 
 const CONTAINER_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Container xmlns="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" />`;
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles>
+    <rootfile full-path="designmap.xml" media-type="application/vnd.adobe.indesign-idml-package" />
+  </rootfiles>
+</container>`;
 
 const META_XML = (title) => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/">

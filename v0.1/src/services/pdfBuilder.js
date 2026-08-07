@@ -1,4 +1,5 @@
 const PDFDocument = require('pdfkit');
+const SVGtoPDF = require('svg-to-pdfkit');
 const { PassThrough } = require('stream');
 
 /**
@@ -14,7 +15,7 @@ const ORANGE = '#F7931E';
 const PURPLE = '#5B3E96';
 const DARK = '#2A2A2A';
 
-function buildPreviewPdf({ narrative, tabel1, tabel2, ctx, meta }) {
+function buildPreviewPdf({ narrative, tabel1, tabel2, ctx, meta, infografisSvg }) {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: 50, bufferPages: true });
     const chunks = [];
@@ -65,6 +66,13 @@ function buildPreviewPdf({ narrative, tabel1, tabel2, ctx, meta }) {
     subheading(doc, 'Tabel 2');
     drawTable2(doc, tabel2);
 
+    // Infografis
+    if (infografisSvg) {
+      doc.addPage();
+      section(doc, 'Lampiran: Infografis');
+      SVGtoPDF(doc, infografisSvg, 50, doc.y, { width: doc.page.width - 100 });
+    }
+
     // Nomor halaman
     const range = doc.bufferedPageRange();
     for (let i = 0; i < range.count; i++) {
@@ -82,7 +90,7 @@ function buildPreviewPdf({ narrative, tabel1, tabel2, ctx, meta }) {
 function section(doc, text) {
   if (doc.y > 700) doc.addPage();
   doc.moveDown(0.5);
-  doc.fillColor(PURPLE).fontSize(14).text(text, { bold: true });
+  doc.fillColor(PURPLE).fontSize(14).text(text, 50, doc.y, { bold: true, width: doc.page.width - 100 });
   doc.moveDown(0.3);
   doc.fillColor(DARK).fontSize(10);
 }
@@ -90,7 +98,7 @@ function section(doc, text) {
 function subheading(doc, text) {
   if (doc.y > 700) doc.addPage();
   doc.moveDown(0.4);
-  doc.fillColor(ORANGE).fontSize(11).text(text, { bold: true });
+  doc.fillColor(ORANGE).fontSize(11).text(text, 50, doc.y, { bold: true, width: doc.page.width - 100 });
   doc.moveDown(0.2);
   doc.fillColor(DARK).fontSize(10);
 }
@@ -98,14 +106,14 @@ function subheading(doc, text) {
 function para(doc, text) {
   if (!text) return;
   if (doc.y > 720) doc.addPage();
-  doc.fillColor(DARK).fontSize(9.5).text(text, { align: 'justify' });
+  doc.fillColor(DARK).fontSize(9.5).text(text, 50, doc.y, { align: 'justify', width: doc.page.width - 100 });
   doc.moveDown(0.5);
 }
 
 function bulletPara(doc, text) {
   if (!text) return;
   if (doc.y > 720) doc.addPage();
-  doc.fillColor(DARK).fontSize(9.5).text(`•  ${text}`, { align: 'justify', indent: 0 });
+  doc.fillColor(DARK).fontSize(9.5).text(`•  ${text}`, 50, doc.y, { align: 'justify', indent: 0, width: doc.page.width - 100 });
   doc.moveDown(0.5);
 }
 

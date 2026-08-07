@@ -92,7 +92,7 @@ async function runRenderJob(sessionId, parsedData, workbookPath, userInput) {
 
     setStepRunning('export');
     const docxBuffer = await buildNarasiDocx({ narrative, tabel1, tabel2, ctx, meta });
-    const pdfBuffer = await buildPreviewPdf({ narrative, tabel1, tabel2, ctx, meta });
+    const pdfBuffer = await buildPreviewPdf({ narrative, tabel1, tabel2, ctx, meta, infografisSvg });
 
     const outDir = path.join(OUTPUTS_DIR, sessionId);
     fs.mkdirSync(outDir, { recursive: true });

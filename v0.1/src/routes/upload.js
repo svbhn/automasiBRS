@@ -109,4 +109,33 @@ router.patch('/upload/:sessionId/periode', (req, res) => {
   res.json({ ok: true, userInput });
 });
 
+/**
+ * GET /api/data/:sessionId
+ * Mengambil data mentah (kelompok & komoditas) untuk Kelola Data.
+ */
+router.get('/data/:sessionId', (req, res) => {
+  const { getSession } = require('../services/sessionStore');
+  const session = getSession(req.params.sessionId);
+  if (!session) return res.status(404).json({ ok: false, error: 'Sesi tidak ditemukan.' });
+  res.json({ ok: true, data: session.parsedData });
+});
+
+/**
+ * PUT /api/data/:sessionId
+ * Menyimpan data mentah yang telah diedit oleh user dari Kelola Data.
+ */
+router.put('/data/:sessionId', express.json(), (req, res) => {
+  const { getSession, updateSession } = require('../services/sessionStore');
+  const session = getSession(req.params.sessionId);
+  if (!session) return res.status(404).json({ ok: false, error: 'Sesi tidak ditemukan.' });
+  
+  if (req.body && req.body.kelompok) {
+    const parsedData = { ...session.parsedData };
+    parsedData.kelompok = req.body.kelompok;
+    if (req.body.umum) parsedData.umum = req.body.umum;
+    updateSession(session.id, { parsedData });
+  }
+  res.json({ ok: true });
+});
+
 module.exports = router;

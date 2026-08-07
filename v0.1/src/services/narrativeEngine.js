@@ -68,13 +68,17 @@ function buildRingkasan(data, ctx) {
     (k, i) => `kelompok ${labelOf(k)} sebesar ${persen(k.infYoy)}`
   );
 
-  let paragraf2 = `Inflasi y-on-y terjadi karena adanya kenaikan harga yang ditunjukkan oleh naiknya `;
-  paragraf2 += `indeks kelompok pengeluaran pada ${joinSemicolonList(naikPhrases)}.`;
-  if (turunPhrases.length > 0) {
-    paragraf2 +=
-      ` Sementara itu, kelompok pengeluaran yang mengalami penurunan indeks, yaitu ${joinSemicolonList(
-        turunPhrases
-      )}.`;
+  let paragraf2 = '';
+  if (umum.infYoy >= 0) {
+    paragraf2 = `Inflasi y-on-y terjadi karena adanya kenaikan harga yang ditunjukkan oleh naiknya indeks kelompok pengeluaran pada ${joinSemicolonList(naikPhrases)}.`;
+    if (turunPhrases.length > 0) {
+      paragraf2 += ` Sementara itu, kelompok pengeluaran yang mengalami penurunan indeks, yaitu ${joinSemicolonList(turunPhrases)}.`;
+    }
+  } else {
+    paragraf2 = `Deflasi y-on-y terjadi karena adanya penurunan harga yang ditunjukkan oleh turunnya indeks kelompok pengeluaran pada ${joinSemicolonList(turunPhrases)}.`;
+    if (naikPhrases.length > 0) {
+      paragraf2 += ` Sementara itu, kelompok pengeluaran yang mengalami kenaikan indeks, yaitu ${joinSemicolonList(naikPhrases)}.`;
+    }
   }
 
   const paragraf3 =

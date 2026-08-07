@@ -74,9 +74,14 @@
   document.addEventListener('DOMContentLoaded', init);
 
   function init() {
+    loadDashboard();
     const bulanSelect = document.getElementById('input-bulan');
     if (bulanSelect) {
       bulanSelect.innerHTML = BULAN_LIST.map((b, i) => `<option value="${i + 1}">${b}</option>`).join('');
+    }
+    const tahunInput = document.getElementById('input-tahun');
+    if (tahunInput && !tahunInput.value) {
+      tahunInput.value = new Date().getFullYear();
     }
     loadDobOptions();
 
@@ -105,6 +110,123 @@
       if (el) el.addEventListener('change', syncPeriodeToServer);
     });
   }
+
+  async function loadDashboard() {
+    try {
+      const res = await fetch(`${API}/api/sessions`);
+      const json = await res.json();
+      if (!json.ok) return;
+      
+      const sessions = json.data || [];
+      const valEl = document.querySelector('.stat-card .v');
+      if (valEl) valEl.innerHTML = `${sessions.length}<span class="unit">selesai</span>`;
+      
+      const ctx = document.getElementById('dashboardChart');
+      if (ctx && window.Chart) {
+        const counts = {};
+        sessions.forEach(s => {
+          const m = s.periode || 'Unknown';
+          counts[m] = (counts[m] || 0) + 1;
+        });
+        const labels = Object.keys(counts);
+        const data = Object.values(counts);
+        
+        if (window.dashChart) window.dashChart.destroy();
+        window.dashChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels.length ? labels : ['Belum ada data'],
+            datasets: [{
+              label: 'Jumlah BRS Diproses',
+              data: data.length ? data : [0],
+              backgroundColor: '#4f46e5',
+              borderRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+          }
+        });
+      }
+      
+      const table = document.querySelector('.brs-table');
+      if (table && sessions.length) {
+        table.innerHTML = `<tr><th>Periode</th><th>Wilayah</th><th>Status</th><th style="text-align:right;">Aksi</th></tr>` + 
+          sessions.map(s => `<tr>
+            <td>${escapeHtmlGlobal(s.periode || '-')}</td>
+            <td>${escapeHtmlGlobal(s.wilayah || '-')}</td>
+            <td><span class="history-status ${s.status === 'done' ? 'done' : 'pending'}">${s.status}</span></td>
+            <td class="num"><a href="#" class="row-link highlight" onclick="state.sessionId='${s.id}'; goToResult(); return false;">Lihat berkas</a></td>
+          </tr>`).join('');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  window.openDataEditor = async function() {
+    if (!state.sessionId) return;
+    try {
+      const res = await fetch(`${API}/api/data/${state.sessionId}`);
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      
+      state.editorData = json.data;
+      const tbody = document.querySelector('#data-editor-table tbody');
+      if (!tbody) return;
+      
+      let html = '';
+      let no = 1;
+      (json.data.kelompok || []).forEach((k, i) => {
+        html += `<tr style="background:#f8fafc; font-weight:600;">
+          <td>${no++}</td>
+          <td>${escapeHtmlGlobal(k.nama)}</td>
+          <td><input type="text" style="width:100%;text-align:right;" data-idx="${i}" data-field="infYoy" value="${k.infYoy || ''}"></td>
+          <td><input type="text" style="width:100%;text-align:right;" data-idx="${i}" data-field="andil" value="${k.andil || ''}"></td>
+        </tr>`;
+      });
+      tbody.innerHTML = html;
+      
+      document.getElementById('data-editor-modal').style.display = 'flex';
+    } catch (err) {
+      showModal(err.message, { title: 'Gagal memuat data', type: 'error' });
+    }
+  };
+
+  window.closeDataEditor = function() {
+    document.getElementById('data-editor-modal').style.display = 'none';
+  };
+
+  window.saveDataEditor = async function() {
+    if (!state.editorData || !state.sessionId) return;
+    
+    // Ambil data dari tabel
+    const inputs = document.querySelectorAll('#data-editor-table input');
+    inputs.forEach(input => {
+      const idx = input.getAttribute('data-idx');
+      const field = input.getAttribute('data-field');
+      if (idx !== null && field && state.editorData.kelompok[idx]) {
+        state.editorData.kelompok[idx][field] = parseFloat(input.value.replace(',','.')) || null;
+      }
+    });
+    
+    try {
+      const res = await fetch(`${API}/api/data/${state.sessionId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state.editorData)
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      
+      closeDataEditor();
+      showModal('Data berhasil disimpan. Anda bisa lanjut ke pemetaan.', { title: 'Sukses', type: 'success' });
+    } catch (err) {
+      showModal(err.message, { title: 'Gagal menyimpan', type: 'error' });
+    }
+  };
 
   async function loadDobOptions() {
     try {
@@ -161,6 +283,8 @@
       }
 
       document.getElementById('btn-to-step2').disabled = false;
+      const btnEdit = document.getElementById('btn-edit-data');
+      if (btnEdit) btnEdit.disabled = false;
     } catch (err) {
       document.getElementById('fsub').textContent = `Gagal: ${err.message}`;
       showModal(err.message, { title: 'Upload gagal', type: 'error' });
@@ -181,6 +305,15 @@
 
   window.proceedToMapping = async function () {
     if (!state.sessionId) return showModal('Unggah file Excel terlebih dahulu sebelum lanjut.', { title: 'Belum ada file', type: 'error' });
+    
+    const periodeFields = document.getElementById('periode-fields');
+    if (periodeFields && periodeFields.style.display !== 'none') {
+      const tahunInput = document.getElementById('input-tahun');
+      if (!tahunInput.value || tahunInput.value.trim() === '') {
+        return showModal('Mohon isi tahun pada kolom periode sebelum melanjutkan.', { title: 'Tahun belum diisi', type: 'warning' });
+      }
+    }
+
     await syncPeriodeToServer();
     goTo(2);
     await loadMapping();
@@ -293,7 +426,7 @@
       const json = await res.json();
       if (!json.ok) throw new Error(json.error);
 
-      const ICON = { narasi: 'DOC', indesign: 'IDML', infografis: 'SVG', gambar1: 'SVG', pdf: 'PDF' };
+      const ICON = { narasi: 'DOC', indesign: 'IDML', infografis: 'SVG', gambar1: 'SVG', pdf: 'PDF', csv: 'CSV' };
       grid.innerHTML = json.files
         .map(
           (f) => `<div class="output-card">

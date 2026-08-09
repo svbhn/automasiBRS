@@ -121,35 +121,6 @@
       const valEl = document.querySelector('.stat-card .v');
       if (valEl) valEl.innerHTML = `${sessions.length}<span class="unit">selesai</span>`;
       
-      const ctx = document.getElementById('dashboardChart');
-      if (ctx && window.Chart) {
-        const counts = {};
-        sessions.forEach(s => {
-          const m = s.periode || 'Unknown';
-          counts[m] = (counts[m] || 0) + 1;
-        });
-        const labels = Object.keys(counts);
-        const data = Object.values(counts);
-        
-        if (window.dashChart) window.dashChart.destroy();
-        window.dashChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: labels.length ? labels : ['Belum ada data'],
-            datasets: [{
-              label: 'Jumlah BRS Diproses',
-              data: data.length ? data : [0],
-              backgroundColor: '#4f46e5',
-              borderRadius: 4
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-          }
-        });
-      }
       
       const table = document.querySelector('.brs-table');
       if (table && sessions.length) {

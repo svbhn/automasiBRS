@@ -1,10 +1,5 @@
-/**
- * Wiring frontend <-> backend Otomasi BRS.
- * Tidak mengubah desain/struktur visual frontend.html -- hanya mengisi data
- * nyata ke elemen yang sudah diberi id, dan memanggil endpoint REST backend.
- */
 (function () {
-  const API = ''; // sama origin (server.js menyajikan frontend & API bersamaan)
+  const API = ''; 
   let state = { sessionId: null, parsed: null, pollTimer: null };
 
   const BULAN_LIST = [
@@ -12,14 +7,7 @@
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
   ];
 
-  /**
-   * Modal popup kustom menggantikan alert()/confirm() bawaan browser
-   * (yang tampil sebagai dialog OS polos "localhost:4000 says..."). Dipakai
-   * di seluruh notifikasi kesalahan/peringatan/sukses pada wizard.
-   *
-   * showModal(message, { title, type, onOk, showCancel, onCancel })
-   * type: 'error' | 'success' | 'info'
-   */
+
   function showModal(message, opts = {}) {
     const { title, type = 'info', onOk, showCancel = false, onCancel, okLabel = 'OK', cancelLabel = 'Batal' } = opts;
 
@@ -65,7 +53,7 @@
     overlay.querySelector('.modal-btn-ok').focus();
     return { close };
   }
-  window.showModal = showModal; // tersedia global bila dibutuhkan elemen lain
+  window.showModal = showModal; // ada global kalo dibutuhkan elemen lain
 
   function escapeHtmlGlobal(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -243,7 +231,7 @@
       document.getElementById('sum-mom').textContent = fmt(json.ringkasan.infMoM) + '%';
       document.getElementById('sum-ytd').textContent = fmt(json.ringkasan.infYtd) + '%';
 
-      // Tampilkan field periode manual bila tidak lengkap otomatis dari file
+      // Tampilkan field periode manual klo tidak lengkap otomatis dari file
       const needManual = !json.meta || !json.meta.bulan || !json.meta.tahun;
       const periodeFields = document.getElementById('periode-fields');
       if (periodeFields) {

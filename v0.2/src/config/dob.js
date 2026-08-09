@@ -16,7 +16,7 @@
  *   9400 -> "PROV PAPUA"
  *   9500 -> "PROV PAPUA SELATAN"
  *   9700 -> "PROV PAPUA PEGUNUNGAN"
- * Entri lain (91xx/92xx/93xx) masih perkiraan -- lengkapi lewat
+ * Entri lain (91xx/92xx/93xx) masih perkiraan -- lengkapi dari
  * PUT /api/dob/:kode ketika file DOB tsb pertama kali diunggah.
  */
 

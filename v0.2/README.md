@@ -9,7 +9,7 @@ Unduh).
 ## Menjalankan
 
 ```bash
-cd backend
+cd v0.2
 npm install
 npm start          # server di http://localhost:4000
 # atau untuk auto-reload saat development:
@@ -87,7 +87,7 @@ monoton tapi tetap reproducible untuk QA.
 ## Struktur proyek
 
 ```
-backend/
+v0.2/
 ├── server.js                     # entry point Express
 ├── src/
 │   ├── config/
